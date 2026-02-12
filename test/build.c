@@ -4,10 +4,11 @@
 #define FLAGS "-Wall", "-Wextra", "-O2"
 #define COMPILER "gcc"
 #define SOURCES "main.c"
+#define INCLUDES "-I../"
 
 #define RAYLIB_FOLDER "./raylib/"
-#define RAYLIB_URL "https://github.com/raysan5/raylib/releases/download/5.5/raylib-5.5_linux_amd64.tar.gz"
-#define RAYLIB "-I./raylib/include", "./raylib/lib/libraylib.a", "-lm", "-lpthread"
+#define RAYLIB_URL "https://github.com/raysan5/raylib/releases/download/5.5/raylib-5.5_macos.tar.gz"
+#define RAYLIB "-I./raylib/include", "./raylib/lib/libraylib.a", "-lm", "-lpthread", "-framework", "CoreVideo", "-framework", "IOKit", "-framework", "Cocoa", "-framework", "OpenGL", "-framework", "OpenAL"
 
 static int app_pid = 0;
 
@@ -21,7 +22,7 @@ void project(void) {
     }
 
     // Build the project
-    BUILD_CMD(COMPILER, FLAGS, "-o", "main", SOURCES, RAYLIB);
+    BUILD_CMD(COMPILER, FLAGS, "-o", "main", SOURCES, INCLUDES, RAYLIB);
 
     // Execute the built application
     if (app_pid > 0) BUILD_KILL_PROCESS(app_pid);
