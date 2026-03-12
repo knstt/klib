@@ -7,14 +7,16 @@
 #include "stack.h"
 #include "list.h"
 
+#define SIZE 20
+
 // Vec types
 VEC(int, IntVec);
 
 // Queue types
-QUEUE(int, IntQueue);
+QUEUE(int, IntQueue, SIZE);
 
 // Stack types
-STACK(int, IntStack);
+STACK(int, IntStack, SIZE);
 
 // List types
 LIST_NODE(int, IntNode);
@@ -121,7 +123,7 @@ int queue_test()
     printf("Test 1: Basic initialization and QUEUE_ENQUEUE\n");
     IntQueue my_queue = {0};
     assert(QUEUE_SIZE(my_queue) == 0);
-    assert(QUEUE_CAPACITY(my_queue) == 0);
+    assert(QUEUE_CAPACITY(my_queue) == SIZE);
 
     for (int i = 0; i < 10; ++i)
     {
@@ -129,7 +131,6 @@ int queue_test()
         QUEUE_ENQUEUE(my_queue, value);
     }
     assert(QUEUE_SIZE(my_queue) == 10);
-    assert(QUEUE_CAPACITY(my_queue) >= 10);
 
     // Test 2: QUEUE_FRONT
     printf("Test 2: QUEUE_FRONT\n");
@@ -173,8 +174,6 @@ int queue_test()
     QUEUE_RESET(my_queue);
     assert(QUEUE_IS_EMPTY(my_queue));
     assert(QUEUE_SIZE(my_queue) == 0);
-    assert(QUEUE_CAPACITY(my_queue) == 0);
-    assert(my_queue.data == NULL);
 
     printf("=== All Queue Tests Passed ===\n");
     return 0;
@@ -188,14 +187,13 @@ int stack_test()
     printf("Test 1: Basic initialization and STACK_PUSH\n");
     IntStack my_stack = {0};
     assert(STACK_SIZE(my_stack) == 0);
-    assert(STACK_CAPACITY(my_stack) == 0);
+    assert(STACK_CAPACITY(my_stack) == SIZE);
 
     for (int i = 0; i < 10; ++i)
     {
         STACK_PUSH(my_stack, i);
     }
     assert(STACK_SIZE(my_stack) == 10);
-    assert(STACK_CAPACITY(my_stack) >= 10);
 
     // Test 2: STACK_TOP
     printf("Test 2: STACK_TOP\n");
@@ -234,8 +232,6 @@ int stack_test()
     STACK_RESET(my_stack);
     assert(STACK_IS_EMPTY(my_stack));
     assert(STACK_SIZE(my_stack) == 0);
-    assert(STACK_CAPACITY(my_stack) == 0);
-    assert(my_stack.data == NULL);
 
     printf("=== All Stack Tests Passed ===\n");
     return 0;
