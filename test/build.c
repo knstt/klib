@@ -1,6 +1,9 @@
 #define BUILD_IMPLEMENTATION
 #include "../build.h"
 
+#define ARGS_IMPLEMENTATION
+#include "../args.h"
+
 #define FLAGS "-Wall", "-Wextra", "-O2"
 #define COMPILER "gcc"
 #define SOURCES "main.c"
@@ -11,6 +14,12 @@
 #define RAYLIB "-I./raylib/include", "./raylib/lib/libraylib.a", "-lm", "-lpthread", "-framework", "CoreVideo", "-framework", "IOKit", "-framework", "Cocoa", "-framework", "OpenGL", "-framework", "OpenAL"
 
 static int app_pid = 0;
+
+#define BUILD_ARGS \
+    ARGS_FLAG("w", "watch", "Enable watch mode (rebuild on file changes)") \
+    ARGS_FLAG("r", "run", "Run the built application after building")
+
+ARGS_PARSE_CTX(build_args_parser, BUILD_ARGS)
 
 void project(void) {
     // Ensure Raylib is available
@@ -25,15 +34,31 @@ void project(void) {
     BUILD_CMD(COMPILER, FLAGS, "-o", "main", SOURCES, INCLUDES, RAYLIB);
 
     // Execute the built application
-    if (app_pid > 0) BUILD_KILL_PROCESS(app_pid);
-    app_pid = BUILD_RUN_PROCESS("./main", NULL);
+    if(ARGS_GET_FLAG(&build_args_parser, "run")) {
+        if (app_pid > 0) BUILD_KILL_PROCESS(app_pid);
+        app_pid = BUILD_RUN_PROCESS("./main", NULL);
+    }
 }
 
 int main(int argc, char **argv) {
     BUILD_REBUILD_URSELF(argc, argv);
     
-    const char *watch_files[] = {SOURCES};
-    BUILD_WATCH_AND_REBUILD(watch_files, project);
+    if (ARGS_PARSE(&build_args_parser) != 0) {
+        BUILD_PRINTF("Error parsing arguments.\n");
+        return -1;
+    }
+
+    if (ARGS_GET_FLAG(&build_args_parser, "help")) {
+        ARGS_PRINT_USAGE(build_args_parser);
+        return 0;
+    }
+
+    if (ARGS_GET_FLAG(&build_args_parser, "watch")) {
+        const char *watch_files[] = {SOURCES};
+        BUILD_WATCH_AND_REBUILD(watch_files, project);
+    } else {
+        project();
+    }
     
     return 0;
 }
