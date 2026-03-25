@@ -10,6 +10,7 @@ A collection of lightweight, header-only data structure and utility libraries fo
 | `stack.h` | Generic LIFO stack             |
 | `queue.h` | Generic FIFO queue             |
 | `list.h`  | Generic doubly-linked list     |
+| `args.h`  | Minimal CLI argument parser    |
 | `build.h` | Single-header build system     |
 
 ## Usage
@@ -36,3 +37,5 @@ int main(int argc, char **argv) {
 ```
 
 See the header comment in each file for the full list of customization macros.
+
+Note: the test project in `test/` downloads Raylib and currently targets macOS in `test/build.c`.

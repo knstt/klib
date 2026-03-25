@@ -1,35 +1,30 @@
-// args.h - Minimal single-header CLI argument helpers and a small option
-// parser inspired by the example in `arg_test.c`.
+// args.h - Minimal single-header CLI argument helpers for C
 //
 // USAGE:
-//   - Include this header where you need types or macros.
-//   - Provide the implementation in exactly one C file by defining
-//     ARGS_IMPLEMENTATION before including this header.
+//   Define ARGS_IMPLEMENTATION in exactly one C file before including this header.
 //
 //   Example:
 //     #define ARGS_IMPLEMENTATION
 //     #include "args.h"
 //
 // FEATURES:
-//   - Lightweight Option description types: flags, string, int
+//   - Lightweight option description types: flags, string, int
 //   - Macros to declare options (ARGS_FLAG / ARGS_STRING / ARGS_INT)
-//   - A simple parser: parse_args()
-//   - Convenience getters: ARGS_GET_FLAG, ARGS_GET_STRING, ARGS_GET_INT
-//   - Small extra helpers for ad-hoc arg lookup (ARGS_HAS / ARGS_GET)
+//   - Parser entrypoints: ARGS_PARSE_CTX / ARGS_PARSE
+//   - Convenience getters: ARGS_GET_FLAG / ARGS_GET_STRING / ARGS_GET_INT
+//
+// CUSTOMIZATION:
+//   #define ARGS_PRINTF to customize logging (default: printf)
 //
 #ifndef ARGS_H_
 #define ARGS_H_
-
-#include <stddef.h> // size_t
 
 #ifndef ARGS_PRINTF
 #include <stdio.h>
 #define ARGS_PRINTF printf
 #endif
 
-// ---------------------------------------------------------------------------
-// Types from the example
-// ---------------------------------------------------------------------------
+// Types
 
 enum {
     TYPE_FLAG,
@@ -51,7 +46,7 @@ typedef struct {
 
 typedef struct {
     Argument* arguments;
-    size_t count;
+    int count;
 } Parser;
 
 // Macros to declare options inline (similar to the example)
@@ -66,9 +61,7 @@ typedef struct {
     Argument name##_args[] = { {TYPE_FLAG, "Show usage", "-h", "--help", .value.bool_value = 0 }, __VA_ARGS__ }; \
     Parser name = { .arguments = name##_args, .count = sizeof(name##_args) / sizeof(name##_args[0]) };
 
-// ---------------------------------------------------------------------------
 // Simple runtime lookup and convenience getters
-// ---------------------------------------------------------------------------
 
 // get_value(ctx, name, type) -> returns pointer to union value or NULL
 void* get_value(Parser* parser, const char* name, int type);
@@ -77,13 +70,7 @@ void* get_value(Parser* parser, const char* name, int type);
 #define ARGS_GET_STRING(ctx, name) (get_value(ctx, "--" name, TYPE_STRING) ? *(const char**)get_value(ctx, "--" name, TYPE_STRING) : NULL)
 #define ARGS_GET_INT(ctx, name) (get_value(ctx, "--" name, TYPE_INT) ? *(int*)get_value(ctx, "--" name, TYPE_INT) : 0)
 
-// (No ad-hoc helpers or iterator: the header exposes the Argument types,
-// the parser `parse_args`, and runtime lookup `get_value` plus convenience
-// getters. This keeps the API minimal and matches usage in `arg_test.c`.)
-
-// ---------------------------------------------------------------------------
 // Parser functions
-// ---------------------------------------------------------------------------
 
 #define ARGS_PARSE(ctx) parse_args(ctx, argc, argv)
 #define ARGS_PRINT_USAGE(ctx) print_usage(ctx.arguments, ctx.count)
@@ -95,8 +82,6 @@ void print_usage(Argument* args, int num_args);
 // ============================================================================
 // IMPLEMENTATION
 // ============================================================================
-#define ARGS_IMPLEMENTATION
-
 #ifdef ARGS_IMPLEMENTATION
 
 #include <string.h>
@@ -106,7 +91,7 @@ void print_usage(Argument* args, int num_args);
 
 void* get_value(Parser* parser, const char* name, int type) {
     if (!parser) return NULL;
-    for (size_t i = 0; i < parser->count; ++i) {
+    for (int i = 0; i < parser->count; ++i) {
         if (strcmp(name, parser->arguments[i].long_name) == 0) {
             if (parser->arguments[i].type == type) return &parser->arguments[i].value;
             else return NULL;
